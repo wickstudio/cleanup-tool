@@ -22,6 +22,8 @@ def delete_files_in_directory(directory, age_in_days=None, file_extension=None):
             try:
                 os.remove(file_path)
                 print(Fore.YELLOW + f"Deleted file: {file_path}")
+            except PermissionError:
+                print(Fore.RED + f"Permission denied: {file_path}")
             except OSError as e:
                 print(Fore.RED + f"Error deleting {e.filename} - {e.strerror}")
         for name in dirs:
@@ -33,6 +35,8 @@ def delete_files_in_directory(directory, age_in_days=None, file_extension=None):
             try:
                 shutil.rmtree(dir_path)
                 print(Fore.YELLOW + f"Deleted directory: {dir_path}")
+            except PermissionError:
+                print(Fore.RED + f"Permission denied: {dir_path}")
             except OSError as e:
                 print(Fore.RED + f"Error deleting {e.filename} - {e.strerror}")
 
@@ -40,9 +44,14 @@ def delete_empty_directories(directory):
     for root, dirs, _ in os.walk(directory, topdown=False):
         for dir_name in dirs:
             dir_path = os.path.join(root, dir_name)
-            if not os.listdir(dir_path):
-                os.rmdir(dir_path)
-                print(Fore.GREEN + f"Empty directory removed: {dir_path}")
+            try:
+                if not os.listdir(dir_path):
+                    os.rmdir(dir_path)
+                    print(Fore.GREEN + f"Empty directory removed: {dir_path}")
+            except PermissionError:
+                print(Fore.RED + f"Permission denied: {dir_path}")
+            except OSError as e:
+                print(Fore.RED + f"Error removing {e.filename} - {e.strerror}")
 
 def cleanup_downloads_folder(age_in_days=30):
     downloads_folder = os.path.join(os.environ['USERPROFILE'], 'Downloads')
